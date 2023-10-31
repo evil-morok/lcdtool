@@ -1,0 +1,19 @@
+{
+    "version": 2,
+    "configurePresets": [
+        {
+            "name": "default",
+            "displayName": "GCC 10.2.1 arm-linux-gnueabihf",
+            "description": "Using compilers: C = /usr/bin/arm-linux-gnueabihf-gcc, CXX = /usr/bin/arm-linux-gnueabihf-g++",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "generator": "Unix Makefiles",
+            "cacheVariables": {
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
+                "CMAKE_C_COMPILER": "/usr/bin/arm-linux-gnueabihf-gcc",
+                "CMAKE_CXX_COMPILER": "/usr/bin/arm-linux-gnueabihf-g++",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_VERBOSE_MAKEFILE": true
+            }
+        }
+    ]
+}
