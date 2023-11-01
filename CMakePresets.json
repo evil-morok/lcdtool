@@ -12,7 +12,7 @@
                 "CMAKE_C_COMPILER": "/usr/bin/arm-linux-gnueabihf-gcc",
                 "CMAKE_CXX_COMPILER": "/usr/bin/arm-linux-gnueabihf-g++",
                 "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_VERBOSE_MAKEFILE": true
+                "CMAKE_VERBOSE_MAKEFILE": false
             }
         }
     ]

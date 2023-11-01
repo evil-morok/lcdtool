@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${command:cmake.launchTargetDirectory}/${command:cmake.launchTargetFilename}",
-            "args": ["--run", "${workspaceFolder}/test.py"],
+            "args": ["--daemon", "${workspaceFolder}"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],
