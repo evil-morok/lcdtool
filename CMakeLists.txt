@@ -37,6 +37,7 @@ add_dependencies(${target} wiringPiSrc)
 target_link_libraries(${target} wiringPi magic_enum)
 target_link_libraries(${target} ${PYTHON_LIBRARIES})
 
+target_link_options(${target} PRIVATE -Wl,--copy-dt-needed-entries)
 
 
 

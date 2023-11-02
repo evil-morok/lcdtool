@@ -13,10 +13,12 @@ using std::string;
 
 static PyObject* display_backlight(PyObject *self, PyObject *args)
 {
+    Py_BEGIN_ALLOW_THREADS;
     uint32_t rgb;
     if(!PyArg_ParseTuple(args, "I:backlight", &rgb))
         return NULL;
     Display::getInstanse()->setBackLight(rgb);
+    Py_END_ALLOW_THREADS
     Py_RETURN_NONE;
 }
 
@@ -42,9 +44,14 @@ int main(int argc, char* argv[]) {
         exit(0);
     }
 
+
     PythonScript * script = PythonScript::initModule(confDir, string("lcdconfig"), EmbMethods);
 
     script->executeEvent(PythonScript::onStart);
+
+    Display::getInstanse()->getButton();
+
+    script->executeEvent(PythonScript::onStop);
 
     if(script->finalize() < 0) {
         return 120;
