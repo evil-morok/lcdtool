@@ -44,13 +44,24 @@ int main(int argc, char* argv[]) {
         exit(0);
     }
 
-
     PythonScript * script = PythonScript::initModule(confDir, string("lcdconfig"), EmbMethods);
 
     script->executeEvent(PythonScript::onStart);
 
-    Display::getInstanse()->getButton();
+    while (true)
+    {        
+        BtnMapUnion keyPressed;
 
+        while((keyPressed = Display::getInstanse()->getButton()).btnMap8_t == 0) {
+        }
+
+        if(keyPressed.btnMap8_t == 20) {
+            break;
+        }
+
+        cout << "Key: " << int(keyPressed.btnMap8_t) << std::endl;
+
+    }
     script->executeEvent(PythonScript::onStop);
 
     if(script->finalize() < 0) {

@@ -11,9 +11,22 @@
 #include <mutex>
 #include <chrono>
 
+union BtnMapUnion{
+    volatile uint8_t btnMap8_t;
+    struct {
+        volatile uint8_t up     : 1;
+        volatile uint8_t down   : 1;
+        volatile uint8_t left   : 1;
+        volatile uint8_t right  : 1;
+        volatile uint8_t ok     : 1;
+        volatile uint8_t        : 3;
+    } btnMapStruct;
+};
+
 class Display {
 
     static const uint32_t DebounceInterval_us = 50;
+    static const uint32_t DebounceGap = 10;
 
 public:
     enum Buttons {
@@ -24,17 +37,26 @@ public:
         btnOk = 108
     };
 
+    enum BtnMap {
+        map_up = 0,
+        map_down,
+        map_left,
+        map_right,
+        map_ok
+    };
+
     struct Values {
-        uint32_t up;
-        uint32_t down;
-        uint32_t left;
-        uint32_t right;
-        uint32_t ok;
+        volatile uint32_t up;
+        volatile uint32_t down;
+        volatile uint32_t left;
+        volatile uint32_t right;
+        volatile uint32_t ok;
     };
 
 private:
     Display() : _display(0), _readButtons(true) {
         _init();
+        _btnMap.btnMap8_t = 0;
     }
 
     void _init() {
@@ -51,8 +73,6 @@ private:
         digitalWrite(107,1);                                                       
         digitalWrite(101,0);                                                       
         _display = lcdInit(2,16,4,100,102,103,104,105,106,0,0,0,0);   
-
-
 
         pinMode(0, OUTPUT);
         softPwmCreate(0, 0, 255);
@@ -91,14 +111,14 @@ public:
         softPwmWrite(0, (rgb >> 16) & 0xff);
     }
 
-    uint8_t getButton() {
-        
-
+    BtnMapUnion getButton() {
+        return _btnMap;
     }
 
 #define FILTER(x)\
             instance->_buttonValues.x -= instance->_buttonValues.x / DebounceInterval_us;\
-            instance->_buttonValues.x += x * 10
+            instance->_buttonValues.x += x * DebounceGap;\
+            instance->_btnMap.btnMapStruct.x = instance->_buttonValues.x > DebounceInterval_us * DebounceGap / 2
 
 private:
     static void _buttonReader() {
@@ -123,5 +143,6 @@ private:
     volatile bool _readButtons;
     std::thread* _threadButtonReader;
     Values _buttonValues;
+    BtnMapUnion _btnMap;
 };
 
