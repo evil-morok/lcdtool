@@ -53,14 +53,26 @@ int main(int argc, char* argv[]) {
         BtnMapUnion keyPressed;
 
         while((keyPressed = Display::getInstanse()->getButton()).btnMap8_t == 0) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
 
         if(keyPressed.btnMap8_t == 20) {
             break;
         }
 
-        cout << "Key: " << int(keyPressed.btnMap8_t) << std::endl;
+        if(keyPressed.btnMapStruct.up) {
+            script->executeEvent(PythonScript::onKeyUp);
+        } else if(keyPressed.btnMapStruct.down) {
+            script->executeEvent(PythonScript::onKeyDown);
+        } else if(keyPressed.btnMapStruct.left) {
+            script->executeEvent(PythonScript::onKeyLeft);
+        } else if(keyPressed.btnMapStruct.right) {
+            script->executeEvent(PythonScript::onKeyRight);
+        } else if(keyPressed.btnMapStruct.ok) {
+            script->executeEvent(PythonScript::onKeyOk);
+        }
 
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
     script->executeEvent(PythonScript::onStop);
 

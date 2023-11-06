@@ -16,7 +16,7 @@ class PythonScript {
 
 public:
     enum Events { 
-        onStart, onStop, onMenuSelected, onKeyPressed, every1ms
+        onStart, onStop, onKeyUp, onKeyDown, onKeyLeft, onKeyRight, onKeyOk, every1ms
     };
 
 private:
