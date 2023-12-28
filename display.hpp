@@ -81,11 +81,7 @@ private:
         pinMode(3, OUTPUT);
         softPwmCreate(3, 0, 255);
 
-        lcdHome(_display);
-        lcdClear(_display);
-
-        lcdPosition(_display, 0, 0);
-        lcdPuts(_display, "epwiojpeofjgp[ewrojgpoerjgpeojfpejfvpeojfvpefjvperjvfpe]");
+        clear();
 
         _threadButtonReader = new std::thread(_buttonReader);
 
@@ -109,6 +105,16 @@ public:
         softPwmWrite(3, rgb & 0xff);
         softPwmWrite(2, (rgb >> 8) & 0xff);
         softPwmWrite(0, (rgb >> 16) & 0xff);
+    }
+
+    void print(uint8_t row, uint8_t col, const char *string) {
+        lcdPosition(_display, col, row);
+        lcdPuts(_display, string);
+    }
+
+    void clear() {
+        lcdHome(_display);
+        lcdClear(_display);
     }
 
     BtnMapUnion getButton() {

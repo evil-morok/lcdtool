@@ -39,6 +39,7 @@ def onStop(context):
     print("=============Stop!===================")
 
 def onKeyUp(context):
+    display.print(1, 0, "test")
     pass 
 
 def onKeyDown(context):

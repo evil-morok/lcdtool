@@ -22,8 +22,30 @@ static PyObject* display_backlight(PyObject *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
+static PyObject* display_print(PyObject *self, PyObject *args)
+{
+    Py_BEGIN_ALLOW_THREADS;
+    uint8_t row, col;
+    const char * str;
+    if(!PyArg_ParseTuple(args, "bbs:print", &row, &col, &str))
+        return NULL;
+    Display::getInstanse()->print(row, col, str);
+    Py_END_ALLOW_THREADS
+    Py_RETURN_NONE;
+}
+
+static PyObject* display_cls(PyObject *self, PyObject *args)
+{
+    Py_BEGIN_ALLOW_THREADS;
+    Display::getInstanse()->clear();
+    Py_END_ALLOW_THREADS
+    Py_RETURN_NONE;
+}
+
 static PyMethodDef EmbMethods[] = {
     {"backlight", display_backlight, METH_VARARGS, "Set backlight color"},
+    {"print", display_print, METH_VARARGS, "Print chars at the defined position"},
+    {"clear", display_cls, METH_VARARGS, "Clears the screen"},
     {NULL, NULL, 0, NULL}
 };
 
