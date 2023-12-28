@@ -8,4 +8,4 @@ Somethings are working here:
 * Keyboard events;
 * Display output.
 
-
+For more information look at lcdconfig.py
