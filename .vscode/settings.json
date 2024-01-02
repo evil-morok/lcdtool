@@ -1,7 +1,8 @@
 {
     "files.associations": {
         "iostream": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "map": "cpp"
     },
     "cmake.configureOnOpen": true
 }

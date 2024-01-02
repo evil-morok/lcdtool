@@ -30,6 +30,7 @@ def every1ms(context):
     color = (int(rgb[0]) & 0xff) + ((int(rgb[1]) & 0xff) << 8) + ((int(rgb[2]) & 0xff) << 16)
 
     display.backlight(color)
+    return True
 
 def onStart(context):
     print("=============INIT!===================")
