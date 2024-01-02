@@ -6,9 +6,14 @@
 
 #include "pscrypt.hpp"
 
+#include "menu.hpp"
+
 using namespace clipp; 
 using std::cout; 
 using std::string;
+
+#define ROWS 2
+#define COLS 16
 
 
 static PyObject* display_backlight(PyObject *self, PyObject *args)
@@ -68,7 +73,16 @@ int main(int argc, char* argv[]) {
 
     PythonScript * script = PythonScript::initModule(confDir, string("lcdconfig"), EmbMethods);
 
-    script->executeEvent(PythonScript::onStart);
+    Menu* mainMenu = new Menu();
+
+    mainMenu->current = mainMenu->addItem("Player");
+    mainMenu->addItem("Directory");
+    mainMenu->addItem("Power")->
+        addItem("No")->getParent()->
+        addItem("Yes");
+
+    script->executeEvent("onStart");
+
 
     while (true)
     {        
@@ -83,20 +97,27 @@ int main(int argc, char* argv[]) {
         }
 
         if(keyPressed.btnMapStruct.up) {
-            script->executeEvent(PythonScript::onKeyUp);
+            script->executeEvent("onKeyUp");
+            mainMenu->prevItem();
         } else if(keyPressed.btnMapStruct.down) {
-            script->executeEvent(PythonScript::onKeyDown);
+            script->executeEvent("onKeyDown");
+            mainMenu->nextItem();
         } else if(keyPressed.btnMapStruct.left) {
-            script->executeEvent(PythonScript::onKeyLeft);
+            script->executeEvent("onKeyLeft");
         } else if(keyPressed.btnMapStruct.right) {
-            script->executeEvent(PythonScript::onKeyRight);
+            script->executeEvent("onKeyRight");
         } else if(keyPressed.btnMapStruct.ok) {
-            script->executeEvent(PythonScript::onKeyOk);
+            script->executeEvent("onKeyOk");
         }
+
+        char buffer[ROWS * COLS + 1];        
+        mainMenu->render(buffer, ROWS * COLS + 1);
+        buffer[ROWS * COLS] = 0;
+        Display::getInstanse()->print(0, 0, buffer);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
-    script->executeEvent(PythonScript::onStop);
+    script->executeEvent("onStop");
 
     if(script->finalize() < 0) {
         return 120;

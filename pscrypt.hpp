@@ -14,11 +14,6 @@ using std::string;
 
 class PythonScript {
 
-public:
-    enum Events { 
-        onStart, onStop, onKeyUp, onKeyDown, onKeyLeft, onKeyRight, onKeyOk, every1ms
-    };
-
 private:
     PythonScript() : 
         _isFinalized(false), 
@@ -60,20 +55,20 @@ public:
         return &instance;
     }
 
-    bool executeEvent(Events e) {
+    bool executeEvent(const char * func) {
         assert(_pyModule != NULL);
         const std::lock_guard<std::mutex> lock(_mutex);
         // PyGILState_STATE gstate = PyGILState_Ensure();
         bool result = false;
-        PyObject* pFunc = PyObject_GetAttrString(_pyModule, magic_enum::enum_name(e).data());
+        PyObject* pFunc = PyObject_GetAttrString(_pyModule, func);
         if(pFunc){
             if(PyCallable_Check(pFunc)){
                 PyObject* pArgs = PyTuple_New(1);
                 PyTuple_SetItem(pArgs, 0, _pyContext);
                 PyObject* pValue = PyObject_CallObject(pFunc, pArgs);
+                result = PyObject_IsTrue(pValue);
                 Py_DECREF(pArgs);
                 Py_XDECREF(pValue);
-                result = true;
             }
         }
         Py_XDECREF(pFunc);
@@ -107,7 +102,7 @@ private:
     static void _periodic() {
         PythonScript * instance = PythonScript::getInstance();
         while(!instance->_isFinalized){
-            if(!instance->executeEvent(every1ms)) {
+            if(!instance->executeEvent("every1ms")) {
                 break;
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
