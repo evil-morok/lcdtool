@@ -6,7 +6,8 @@
 
 #include "pscrypt.hpp"
 
-#include "ui_main.hpp"
+#include "view_player.hpp"
+#include "view_main.hpp"
 
 #include <thread>
 
@@ -60,14 +61,14 @@ static PyMethodDef EmbMethods[] = {
     {NULL, NULL, 0, NULL}
 };
 
-Ui* currentUi;
+View* CurrentView;
 
 void UpdateDisplay() {
     static int updateDelay = 0;
     char buffer[ROWS * COLS + 1];
     while (WeAreWorking) {
-        if(updateDelay++ > 1000 || currentUi->NeedUpdate()) {
-            currentUi->render(buffer, ROWS, COLS);
+        if(updateDelay++ > 1000 || CurrentView->NeedUpdate()) {
+            CurrentView->render(buffer, ROWS, COLS);
             buffer[ROWS * COLS] = 0;
             Display::getInstanse()->print(0, 0, buffer);
             updateDelay = 0;
@@ -76,14 +77,21 @@ void UpdateDisplay() {
     }
 }
 
-
-static MainUi mainMenu;
+static Menu MainMenu;
+static MainView mainMenu(&MainMenu, &CurrentView);
+static PlayerView Player(&CurrentView, &mainMenu);
 
 int main(int argc, char* argv[]) { 
     string confDir = "";
     enum class mode {none, init, daemon};
 
-    currentUi = &mainMenu;
+    MainMenu.selected = MainMenu.addItem("Player", &Player);
+    MainMenu.addItem("Browse files")->addItem("asdgsdrrg")->getParent()->addItem("11111111111");
+    MainMenu.addItem("Power")->
+        addItem("No")->getParent()->
+        addItem("Yes");
+
+    CurrentView = &mainMenu;
 
     mode selected = mode::none;
 
@@ -124,19 +132,19 @@ int main(int argc, char* argv[]) {
         }
         if(keyPressed.btnMapStruct.up) {
             script->executeEvent("onKeyUp");
-            currentUi->onKeyUp();
+            CurrentView->onKeyUp();
         } else if(keyPressed.btnMapStruct.down) {
             script->executeEvent("onKeyDown");
-            currentUi->onKeyDown();
+            CurrentView->onKeyDown();
         } else if(keyPressed.btnMapStruct.left) {
             script->executeEvent("onKeyLeft");
-            currentUi->onKeyLeft();
+            CurrentView->onKeyLeft();
         } else if(keyPressed.btnMapStruct.right) {
             script->executeEvent("onKeyRight");
-            currentUi->onKeyRight();
+            CurrentView->onKeyRight();
         } else if(keyPressed.btnMapStruct.ok) {
             script->executeEvent("onKeyOk");
-            currentUi->onKeyOk();
+            CurrentView->onKeyOk();
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(delay));
