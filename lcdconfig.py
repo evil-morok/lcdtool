@@ -40,22 +40,17 @@ def onStop(context):
     print("=============Stop!===================")
 
 def onKeyUp(context):
-    display.print(0, 0, "Up   ")
     pass 
 
 def onKeyDown(context):
-    display.print(0, 0, "Down ")
     pass
 
 def onKeyLeft(context):
-    display.print(0, 0, "Left ")
     pass
 
 def onKeyRight(context):
-    display.print(0, 0, "Right")
     pass 
 
 def onKeyOk(context):
-    display.print(0, 0, "Ok   ")
     pass
 

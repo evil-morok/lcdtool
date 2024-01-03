@@ -25,8 +25,8 @@ union BtnMapUnion{
 
 class Display {
 
-    static const uint32_t DebounceInterval_us = 50;
-    static const uint32_t DebounceGap = 10;
+    static const uint32_t DebounceInterval_us = 100;
+    static const uint32_t DebounceMultiplifier = 10;
 
 public:
     enum Buttons {
@@ -123,8 +123,8 @@ public:
 
 #define FILTER(x)\
             instance->_buttonValues.x -= instance->_buttonValues.x / DebounceInterval_us;\
-            instance->_buttonValues.x += x * DebounceGap;\
-            instance->_btnMap.btnMapStruct.x = instance->_buttonValues.x > DebounceInterval_us * DebounceGap / 2
+            instance->_buttonValues.x += x * DebounceMultiplifier;\
+            instance->_btnMap.btnMapStruct.x = instance->_buttonValues.x > DebounceInterval_us * DebounceMultiplifier / 2
 
 private:
     static void _buttonReader() {
@@ -141,7 +141,7 @@ private:
             FILTER(right);
             FILTER(ok);
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        std::this_thread::sleep_for(std::chrono::microseconds(1));
     }
 
 private:
