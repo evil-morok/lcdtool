@@ -6,7 +6,9 @@
 
 #include "pscrypt.hpp"
 
-#include "menu.hpp"
+#include "ui_main.hpp"
+
+#include <thread>
 
 using namespace clipp; 
 using std::cout; 
@@ -15,6 +17,10 @@ using std::string;
 #define ROWS 2
 #define COLS 16
 
+#define KEY_FIRST_DELAY_MS 700
+#define KEY_DELAY_MS 80
+
+bool WeAreWorking = true;
 
 static PyObject* display_backlight(PyObject *self, PyObject *args)
 {
@@ -54,10 +60,30 @@ static PyMethodDef EmbMethods[] = {
     {NULL, NULL, 0, NULL}
 };
 
+Ui* currentUi;
+
+void UpdateDisplay() {
+    static int updateDelay = 0;
+    char buffer[ROWS * COLS + 1];
+    while (WeAreWorking) {
+        if(updateDelay++ > 1000 || currentUi->NeedUpdate()) {
+            currentUi->render(buffer, ROWS, COLS);
+            buffer[ROWS * COLS] = 0;
+            Display::getInstanse()->print(0, 0, buffer);
+            updateDelay = 0;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+}
+
+
+static MainUi mainMenu;
 
 int main(int argc, char* argv[]) { 
     string confDir = "";
     enum class mode {none, init, daemon};
+
+    currentUi = &mainMenu;
 
     mode selected = mode::none;
 
@@ -73,51 +99,54 @@ int main(int argc, char* argv[]) {
 
     PythonScript * script = PythonScript::initModule(confDir, string("lcdconfig"), EmbMethods);
 
-    Menu* mainMenu = new Menu();
-
-    mainMenu->current = mainMenu->addItem("Player");
-    mainMenu->addItem("Directory");
-    mainMenu->addItem("Power")->
-        addItem("No")->getParent()->
-        addItem("Yes");
+    std::thread threadUpdateDisplay(UpdateDisplay);
 
     script->executeEvent("onStart");
 
+    int delay = KEY_FIRST_DELAY_MS;
 
     while (true)
     {        
         BtnMapUnion keyPressed;
 
         while((keyPressed = Display::getInstanse()->getButton()).btnMap8_t == 0) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            delay = KEY_FIRST_DELAY_MS;
+            std::this_thread::sleep_for(std::chrono::microseconds(100));
         }
+
+// keyPressed = Display::getInstanse()->getButton();
 
         if(keyPressed.btnMap8_t == 20) {
             break;
         }
-
+        if(keyPressed.btnMap8_t == 0) {
+            script->executeEvent("onKeyUp");
+        }
         if(keyPressed.btnMapStruct.up) {
             script->executeEvent("onKeyUp");
-            mainMenu->prevItem();
+            currentUi->onKeyUp();
         } else if(keyPressed.btnMapStruct.down) {
             script->executeEvent("onKeyDown");
-            mainMenu->nextItem();
+            currentUi->onKeyDown();
         } else if(keyPressed.btnMapStruct.left) {
             script->executeEvent("onKeyLeft");
+            currentUi->onKeyLeft();
         } else if(keyPressed.btnMapStruct.right) {
             script->executeEvent("onKeyRight");
+            currentUi->onKeyRight();
         } else if(keyPressed.btnMapStruct.ok) {
             script->executeEvent("onKeyOk");
+            currentUi->onKeyOk();
         }
 
-        char buffer[ROWS * COLS + 1];        
-        mainMenu->render(buffer, ROWS * COLS + 1);
-        buffer[ROWS * COLS] = 0;
-        Display::getInstanse()->print(0, 0, buffer);
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        std::this_thread::sleep_for(std::chrono::milliseconds(delay));
+        delay = KEY_DELAY_MS;
     }
     script->executeEvent("onStop");
+
+    WeAreWorking = false;
+
+    threadUpdateDisplay.join();
 
     if(script->finalize() < 0) {
         return 120;

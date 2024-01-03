@@ -25,15 +25,15 @@ public:
             _root->_parent = item;
         }
         if(isNode()) {
-            _items.back()->_next = item;
-            item->_previous = _items.back();
+            items.back()->_next = item;
+            item->_previous = items.back();
         }
-        _items.push_back(item);
+        items.push_back(item);
         return item;
     }
 
     bool isNode() {
-        return _items.size() > 0;
+        return items.size() > 0;
     }
 
     MenuItem * getParent() {
@@ -41,14 +41,16 @@ public:
     }
 
     ~MenuItem() {
-        for (MenuItem * n : _items) {
+        for (MenuItem * n : items) {
             delete(n);
         }
     }
 
 private:
     MenuItem * _parent;
-    std::vector<MenuItem *> _items;
+
+public:
+    std::vector<MenuItem *> items;
 
 protected:
     MenuItem * _previous;
@@ -66,35 +68,23 @@ public:
     Menu() : MenuItem(nullptr) {
         _root = this;
         label = "";
-        _item = 0;
     };
 
-    void render(char * buffer, int len, int items = 2) {
-        if(current->isNode()) {
-
-        } else {
-
-        }
-        snprintf(buffer, len, "%-16.16s", current->label);
-    }
-
     bool prevItem() {
-        if(current->_previous) {
-            current = current->_previous;
+        if(selected->_previous) {
+            selected = selected->_previous;
             return true;
         }
         return false;
     }
 
     bool nextItem() {
-        if(current->_next) {
-            current = current->_next;
+        if(selected->_next) {
+            selected = selected->_next;
             return true;
         }
         return false;
     }
-    MenuItem * current;
+    MenuItem * selected;
 
-private:
-    int _item;
 };
