@@ -1,6 +1,7 @@
 import display
 import random
 from time import sleep
+from json import dumps
 
 CONFIG = {
     "MusicDir": "/mnt/Storage/Rogov"
@@ -37,11 +38,13 @@ def every1ms(context):
     display.backlight(color)
     return True
 
-def onStart(context):
+def onStart(arg):
     print("=============INIT!===================")
 
 
-def onStop(context):
+def onStop(arg):
     print("=============Stop!===================")
 
-
+def play(arg):
+    print("=============Play!===================")
+    print(arg)

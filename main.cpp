@@ -20,7 +20,7 @@ using std::string;
 #define COLS 16
 
 #define KEY_FIRST_DELAY_MS 700
-#define KEY_DELAY_MS 80
+#define KEY_DELAY_MS 200
 
 bool WeAreWorking = true;
 
@@ -30,7 +30,7 @@ static PyObject* display_backlight(PyObject *self, PyObject *args)
     uint32_t rgb;
     if(!PyArg_ParseTuple(args, "I:backlight", &rgb))
         return NULL;
-    Display::getInstanse()->setBackLight(rgb);
+    Display::getInstance()->setBackLight(rgb);
     Py_END_ALLOW_THREADS
     Py_RETURN_NONE;
 }
@@ -42,7 +42,7 @@ static PyObject* display_print(PyObject *self, PyObject *args)
     const char * str;
     if(!PyArg_ParseTuple(args, "bbs:print", &row, &col, &str))
         return NULL;
-    Display::getInstanse()->print(row, col, str);
+    Display::getInstance()->print(row, col, str);
     Py_END_ALLOW_THREADS
     Py_RETURN_NONE;
 }
@@ -50,7 +50,7 @@ static PyObject* display_print(PyObject *self, PyObject *args)
 static PyObject* display_cls(PyObject *self, PyObject *args)
 {
     Py_BEGIN_ALLOW_THREADS;
-    Display::getInstanse()->clear();
+    Display::getInstance()->clear();
     Py_END_ALLOW_THREADS
     Py_RETURN_NONE;
 }
@@ -71,7 +71,7 @@ void UpdateDisplay() {
         if(updateDelay++ > 1000 || CurrentView->NeedUpdate()) {
             CurrentView->render(buffer, ROWS, COLS);
             buffer[ROWS * COLS] = 0;
-            Display::getInstanse()->print(0, 0, buffer);
+            Display::getInstance()->print(0, 0, buffer);
             updateDelay = 0;
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -84,7 +84,7 @@ static MainView mainMenu(&MainMenu, &CurrentView);
 static PlayerView Player(&CurrentView, &mainMenu);
 
 void StartPlayer(std::string playPath) {
-    std::cout << playPath << "\n";
+    PythonScript::getInstance()->executeEvent("play", playPath.c_str());
 }
 
 static BrowserView Browser(&CurrentView, &mainMenu, StartPlayer);
@@ -127,12 +127,12 @@ int main(int argc, char* argv[]) {
     {        
         BtnMapUnion keyPressed;
 
-        while((keyPressed = Display::getInstanse()->getButton()).btnMap8_t == 0) {
+        while((keyPressed = Display::getInstance()->getButton()).btnMap8_t == 0) {
             delay = KEY_FIRST_DELAY_MS;
             std::this_thread::sleep_for(std::chrono::microseconds(100));
         }
 
-// keyPressed = Display::getInstanse()->getButton();
+// keyPressed = Display::getInstance()->getButton();
 
         if(keyPressed.btnMap8_t == 20) {
             break;

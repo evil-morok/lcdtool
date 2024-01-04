@@ -3,6 +3,7 @@
 #include <thread>
 #include <mutex>
 #include <chrono>
+#include <map>
 
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
@@ -27,8 +28,7 @@ private:
         };
         PyImport_AppendInittab("display", [](){ return PyModule_Create(&EmbModule); } );
         Py_Initialize();
-        PyGILState_STATE gstate = PyGILState_Ensure();
-        _pyContext = PyDict_New();    
+        PyGILState_STATE gstate = PyGILState_Ensure();  
         PyRun_SimpleString("import sys");
         PyRun_SimpleString(string("sys.path.append(\"" + directory + "\")").data());
         PyObject *pName = PyUnicode_DecodeFSDefault(modulename.data());
@@ -63,7 +63,7 @@ public:
         return &instance;
     }
 
-    bool executeEvent(const char * func) {
+    bool executeEvent(const char * func, const char * param = "") {
         assert(_pyModule != NULL);
         const std::lock_guard<std::mutex> lock(_mutex);
         // PyGILState_STATE gstate = PyGILState_Ensure();
@@ -72,7 +72,7 @@ public:
         if(pFunc){
             if(PyCallable_Check(pFunc)){
                 PyObject* pArgs = PyTuple_New(1);
-                PyTuple_SetItem(pArgs, 0, _pyContext);
+                assert(PyTuple_SetItem(pArgs, 0, PyBytes_FromString(param)) == 0);
                 PyObject* pValue = PyObject_CallObject(pFunc, pArgs);
                 result = PyObject_IsTrue(pValue);
                 Py_DECREF(pArgs);
@@ -86,8 +86,7 @@ public:
 
     int finalize() {
         assert(!_isFinalized);
-        PyGILState_STATE gstate = PyGILState_Ensure();
-        Py_DECREF(_pyContext);        
+        PyGILState_STATE gstate = PyGILState_Ensure();      
         Py_XDECREF(_pyModule);
         PyGILState_Release(gstate);
         _isFinalized = true;
@@ -119,7 +118,6 @@ private:
 
 private:
     PyObject* _pyModule;
-    PyObject* _pyContext;
     volatile bool _isFinalized;
     std::thread* _threadPeriodic;
     std::mutex _mutex;

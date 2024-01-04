@@ -96,7 +96,7 @@ public:
         delete(_threadButtonReader);
     }
 
-    static Display* getInstanse() {
+    static Display* getInstance() {
         static Display instance;
         return &instance;
     }
@@ -128,7 +128,7 @@ public:
 
 private:
     static void _buttonReader() {
-        Display* instance = Display::getInstanse();
+        Display* instance = Display::getInstance();
         while(instance->_readButtons) {
             int up = digitalRead(btnUp);
             int down = digitalRead(btnDown);
