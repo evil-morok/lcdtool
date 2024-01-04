@@ -7,6 +7,7 @@
 #include "pscrypt.hpp"
 
 #include "view_player.hpp"
+#include "view_browser.hpp"
 #include "view_main.hpp"
 
 #include <thread>
@@ -56,7 +57,7 @@ static PyObject* display_cls(PyObject *self, PyObject *args)
 
 static PyMethodDef EmbMethods[] = {
     {"backlight", display_backlight, METH_VARARGS, "Set backlight color"},
-    {"print", display_print, METH_VARARGS, "Print chars at the defined position"},
+    // {"print", display_print, METH_VARARGS, "Print chars at the defined position"},
     {"clear", display_cls, METH_VARARGS, "Clears the screen"},
     {NULL, NULL, 0, NULL}
 };
@@ -78,15 +79,17 @@ void UpdateDisplay() {
 }
 
 static Menu MainMenu;
+
 static MainView mainMenu(&MainMenu, &CurrentView);
 static PlayerView Player(&CurrentView, &mainMenu);
+static BrowserView Browser(&CurrentView, &mainMenu);
 
 int main(int argc, char* argv[]) { 
     string confDir = "";
     enum class mode {none, init, daemon};
 
     MainMenu.selected = MainMenu.addItem("Player", &Player);
-    MainMenu.addItem("Browse files")->addItem("asdgsdrrg")->getParent()->addItem("11111111111");
+    MainMenu.addItem("Browse files", &Browser);
     MainMenu.addItem("Power")->
         addItem("No")->getParent()->
         addItem("Yes");
@@ -96,7 +99,7 @@ int main(int argc, char* argv[]) {
     mode selected = mode::none;
 
     auto cli = (        
-        required("--init").set(selected, mode::init) |
+    //    required("--init").set(selected, mode::init) |
         (required("--daemon").set(selected, mode::daemon) & value("confDir", confDir)) 
     );
 
@@ -106,6 +109,8 @@ int main(int argc, char* argv[]) {
     }
 
     PythonScript * script = PythonScript::initModule(confDir, string("lcdconfig"), EmbMethods);
+
+    Browser.setRootDir(script->musicDirectory);
 
     std::thread threadUpdateDisplay(UpdateDisplay);
 

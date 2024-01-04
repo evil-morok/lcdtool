@@ -2,6 +2,11 @@ import display
 import random
 from time import sleep
 
+CONFIG = {
+    "MusicDir": "/mnt/Storage/Rogov"
+}
+
+
 TransitionTime = 2000
 
 rgb = [0, 0, 0]
@@ -39,18 +44,4 @@ def onStart(context):
 def onStop(context):
     print("=============Stop!===================")
 
-def onKeyUp(context):
-    pass 
-
-def onKeyDown(context):
-    pass
-
-def onKeyLeft(context):
-    pass
-
-def onKeyRight(context):
-    pass 
-
-def onKeyOk(context):
-    pass
 
