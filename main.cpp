@@ -82,7 +82,12 @@ static Menu MainMenu;
 
 static MainView mainMenu(&MainMenu, &CurrentView);
 static PlayerView Player(&CurrentView, &mainMenu);
-static BrowserView Browser(&CurrentView, &mainMenu);
+
+void StartPlayer(std::string playPath) {
+    std::cout << playPath << "\n";
+}
+
+static BrowserView Browser(&CurrentView, &mainMenu, StartPlayer);
 
 int main(int argc, char* argv[]) { 
     string confDir = "";
