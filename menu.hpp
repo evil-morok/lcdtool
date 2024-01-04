@@ -17,10 +17,11 @@ protected:
 
 public:
 
-    MenuItem * addItem(const char * label, bool home = false) {
+    MenuItem * addItem(const char * label, View * view = nullptr, bool home = false) {
         auto item = new MenuItem(this);
         item->label = label;
         item->_root = _root;
+        item->view = view;
         if(home) {
             _root->_parent = item;
         }
@@ -51,6 +52,7 @@ private:
 
 public:
     std::vector<MenuItem *> items;
+    View * view;
 
 protected:
     MenuItem * _previous;

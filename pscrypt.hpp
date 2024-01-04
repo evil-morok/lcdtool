@@ -11,7 +11,6 @@
 
 using std::string;
 
-
 class PythonScript {
 
 private:
@@ -34,12 +33,21 @@ private:
         PyRun_SimpleString(string("sys.path.append(\"" + directory + "\")").data());
         PyObject *pName = PyUnicode_DecodeFSDefault(modulename.data());
         _pyModule = PyImport_Import(pName);
+        PyObject* config = PyObject_GetAttrString(_pyModule, "CONFIG");
+
+        auto PyMusicDir = PyDict_GetItemString(config, "MusicDir");
+        // PyObject* repr = PyObject_Repr(PyMusicDir);
+        PyObject* str = PyUnicode_AsEncodedString(PyMusicDir, "utf-8", "~E~");
+
+        musicDirectory = PyBytes_AS_STRING(str);
         Py_DECREF(pName);
         PyGILState_Release(gstate);
         if(_pyModule != NULL) {
             _threadPeriodic = new std::thread(_periodic);
         }
     }
+public:
+    const char* musicDirectory;
 
 public:
     static PythonScript* initModule(string directory, string modulename, PyMethodDef* EmbMethods) {

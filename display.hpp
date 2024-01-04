@@ -122,8 +122,8 @@ public:
     }
 
 #define FILTER(x)\
-            instance->_buttonValues.x -= instance->_buttonValues.x / DebounceInterval_us;\
-            instance->_buttonValues.x += x * DebounceMultiplifier;\
+            instance->_buttonValues.x = instance->_buttonValues.x - instance->_buttonValues.x / DebounceInterval_us;\
+            instance->_buttonValues.x = instance->_buttonValues.x + x * DebounceMultiplifier;\
             instance->_btnMap.btnMapStruct.x = instance->_buttonValues.x > DebounceInterval_us * DebounceMultiplifier / 2
 
 private:
