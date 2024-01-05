@@ -13,63 +13,74 @@
 
 namespace fs = std::filesystem;
 
-typedef std::function<void(std::string)> ActionCallback;
+typedef std::function<void(std::string)> OnPlayPathCallback;
 
 class BrowserView : public View{
 public:
-    BrowserView(View ** currentView, View * parentView, ActionCallback action) :
+    BrowserView(View ** currentView, View * parentView, OnPlayPathCallback action) :
     View(currentView, parentView),
     _action(action),
     _selectedEntry(0),
     _windowPosition(0){}
+
+    virtual const char * getName() {
+        return "Browser";
+    }
 
     virtual void onEnter(){
         populate(_currentPath);
         _needUpdate = true;
     }
 
-    virtual void onKeyUp(){
-        if(_selectedEntry > 0) {
-            _selectedEntry--;
-        }
-        _needUpdate = true;
-    }
-
-    virtual void onKeyDown(){
-        if(_selectedEntry < _entryList.size()) {
-            _selectedEntry++;
-        }
-        _needUpdate = true;
-    }
-
-    virtual void onKeyLeft(){
-        Exit();
-        _needUpdate = true;
-    }
-
-    virtual void onKeyRight(){
-        const std::lock_guard<std::mutex> lock(_mutex);
-        if(_selectedEntry > 0) {
-            if(fs::is_directory(_entryList[_selectedEntry - 1])) {
-                _currentPath = _entryList[_selectedEntry - 1].path();
-                _positions.push_back(_selectedEntry);
-                _selectedEntry = 0;
+    virtual void onKeyUp(bool done){
+        if (!done) {
+            if(_selectedEntry > 0) {
+                _selectedEntry--;
             }
-        } else {
-            _currentPath = _currentPath.parent_path();
-            _selectedEntry = _positions.back();
-            _positions.pop_back();
         }
-        populate(_currentPath);
         _needUpdate = true;
-        
     }
 
-    virtual void onKeyOk(){
-        if(_selectedEntry > 0) {
-            _action(_entryList[_selectedEntry - 1].path().string());
-        } else {
-            _action(_currentPath.string());
+    virtual void onKeyDown(bool done){
+        if (!done) {
+            if(_selectedEntry < _entryList.size()) {
+                _selectedEntry++;
+            }
+        }
+        _needUpdate = true;
+    }
+
+    virtual void onKeyLeft(bool done){
+        if (!done) Exit();
+        _needUpdate = true;
+    }
+
+    virtual void onKeyRight(bool done){
+        if (!done) {
+            const std::lock_guard<std::mutex> lock(_mutex);
+            if(_selectedEntry > 0) {
+                if(fs::is_directory(_entryList[_selectedEntry - 1])) {
+                    _currentPath = _entryList[_selectedEntry - 1].path();
+                    _positions.push_back(_selectedEntry);
+                    _selectedEntry = 0;
+                }
+            } else {
+                _currentPath = _currentPath.parent_path();
+                _selectedEntry = _positions.back();
+                _positions.pop_back();
+            }
+            populate(_currentPath);
+        }
+        _needUpdate = true;
+    }
+
+    virtual void onKeyOk(bool done){
+        if (!done) {
+            if(_selectedEntry > 0) {
+                _action(_entryList[_selectedEntry - 1].path().string());
+            } else {
+                _action(_currentPath.string());
+            }
         }
         _needUpdate = true;
     }
@@ -144,7 +155,7 @@ private:
     int _selectedEntry;
     int _windowPosition;
 
-    ActionCallback _action;
+    OnPlayPathCallback _action;
 
     std::mutex _mutex;
 };

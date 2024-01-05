@@ -72,9 +72,13 @@ public:
         if(pFunc){
             if(PyCallable_Check(pFunc)){
                 PyObject* pArgs = PyTuple_New(1);
-                assert(PyTuple_SetItem(pArgs, 0, PyBytes_FromString(param)) == 0);
+                assert(PyTuple_SetItem(pArgs, 0, PyUnicode_FromString(param)) == 0);
                 PyObject* pValue = PyObject_CallObject(pFunc, pArgs);
-                result = PyObject_IsTrue(pValue);
+                if(pValue) {
+                    result = PyObject_IsTrue(pValue);
+                } else {
+                    PyErr_Print();
+                }
                 Py_DECREF(pArgs);
                 Py_XDECREF(pValue);
             }
