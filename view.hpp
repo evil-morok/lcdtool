@@ -9,12 +9,13 @@ protected:
     _parentView(parentView) {}
 
 public:
+    virtual const char * getName() = 0;
     virtual void onEnter() = 0;
-    virtual void onKeyUp() = 0;
-    virtual void onKeyDown() = 0;
-    virtual void onKeyLeft() = 0;
-    virtual void onKeyRight() = 0;
-    virtual void onKeyOk() = 0;
+    virtual void onKeyUp(bool done) = 0;
+    virtual void onKeyDown(bool done) = 0;
+    virtual void onKeyLeft(bool done) = 0;
+    virtual void onKeyRight(bool done) = 0;
+    virtual void onKeyOk(bool done) = 0;
     virtual void render(char * buffer, int rows, int cols) = 0;
 
 public:
