@@ -74,7 +74,7 @@ void UpdateDisplay() {
     static int updateDelay = 0;
     char buffer[ROWS * COLS + 1];
     while (WeAreWorking) {
-        if(updateDelay++ > 1000 || CurrentView->NeedUpdate()) {
+        if(updateDelay++ > 500 || CurrentView->NeedUpdate()) {
             if(!PythonScript::getInstance()->executeEvent("onRender", CurrentView->getName())) {
                 CurrentView->render(buffer, ROWS, COLS);
                 buffer[ROWS * COLS] = 0;
@@ -119,7 +119,7 @@ int main(int argc, char* argv[]) {
     string confDir = "";
     enum class mode {none, init, daemon};
 
-    MainMenu.selected = MainMenu.addItem("Player", &Player);
+    MainMenu.selected = MainMenu.addItem("Player", &Player, true);
     MainMenu.addItem("Browse files", &Browser);
     MainMenu.addItem("Power")->
         addItem("No")->getParent()->
@@ -139,9 +139,18 @@ int main(int argc, char* argv[]) {
         exit(0);
     }
 
-    PythonScript * script = PythonScript::initModule(confDir, string("lcdconfig"), EmbMethods);
+    PythonScript * script;
+
+    try{
+        script = PythonScript::initModule(confDir, string("lcdconfig"), EmbMethods);
+    } catch (...) {
+        std::cout << "Python init error";
+        exit(255);
+    }
 
     Browser.setRootDir(script->musicDirectory);
+
+
 
     std::thread threadUpdateDisplay(UpdateDisplay);
 

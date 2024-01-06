@@ -36,7 +36,6 @@ private:
         PyObject* config = PyObject_GetAttrString(_pyModule, "CONFIG");
 
         auto PyMusicDir = PyDict_GetItemString(config, "MusicDir");
-        // PyObject* repr = PyObject_Repr(PyMusicDir);
         PyObject* str = PyUnicode_AsEncodedString(PyMusicDir, "utf-8", "~E~");
 
         musicDirectory = PyBytes_AS_STRING(str);

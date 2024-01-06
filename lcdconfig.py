@@ -3,12 +3,52 @@ import random
 from os import path
 from mpd import MPDClient
 from subprocess import call
+from typing import Literal
+import socket
+from time import gmtime, strftime
 
 CONFIG = {
     "MusicDir": "/mnt/Storage/Rogov"
 }
 
 client = MPDClient()
+
+class TextScroller:
+    def __init__(self, len : int) -> None:
+        self.len = len
+        self.text = ''
+        self.pos = 0
+
+    def _get(self, n):
+        return self.text[n % len(self.text)]
+
+    def scroll(self, text : str, continous = False):
+        if text != self.text and not continous:
+            self.pos = 0
+        else:
+            self.pos = self.pos + 1
+            if self.pos > len(self.text):
+                self.pos = 0
+        self.text = text
+        if len(text) > self.len:
+            return "".join([self._get(i + self.pos) for i in range(self.len)])
+        else:
+            return text
+
+scroller = TextScroller(16)
+
+def get_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.settimeout(0)
+    try:
+        # doesn't even have to be reachable
+        s.connect(('10.254.254.254', 1))
+        IP = s.getsockname()[0]
+    except Exception:
+        IP = '127.0.0.1'
+    finally:
+        s.close()
+    return IP
 
 def checkConnection():
     try:
@@ -17,13 +57,14 @@ def checkConnection():
         client.idletimeout = None
         client.connect("localhost", 6600)
 
-playing: bool = False
-
 TransitionTime = 2000
 
 rgb = [0, 0, 0]
 newRGB = [0, 0, 0]
 deltas = [0, 0, 0]
+
+def playingState() -> Literal['play', 'pause', 'stop']:
+    return client.status()["state"]
 
 def every1ms(context):
     global rgb, newRGB, deltas, TransitionTime
@@ -63,19 +104,16 @@ def onStop(arg):
     client.disconnect()
 
 def onPlayPath(arg):
-    global playing
+
     print("=============Play!===================")
     music_path = path.relpath(arg, CONFIG["MusicDir"])
     print(music_path)
     client.clear()
     client.add(music_path)
     client.play(0)
-    playing = True
 
 def onPausePlay(arg):
-    global playing
-    playing = not playing
-    client.pause(0 if playing else 1)
+    client.pause(1 if playingState() == 'play' else 0)
 
 def onVolumeUp(arg):
     client.volume(10)
@@ -103,17 +141,23 @@ def onKeyOk(arg):
     pass
 
 def onRender(arg):
-    global playing
     if arg == "Player":
-        status = client.status()
-        print(status)
-        song = client.playlistinfo(status["song"])
-        print(song)
-        title = song[0]["title"]
-        bar = "{:1.1} {:>3.3}".format(
-            ">" if playing else "",
-            status["volume"]
-        )
-        display.print(0, 0, "{:^16.16}{:<16.16}".format(title, bar))
+        if playingState() == 'play':
+            status = client.status()
+            # print(status)
+            song = client.playlistinfo(status["song"])
+            # print(song)
+            title = song[0]["title"]
+            top = "{}.{} -- ".format(
+                song[0]["track"], 
+                title
+            )
+            bar = "Playing Vol:{:>3.3}".format(
+                status["volume"]
+            )
+            display.print(0, 0, "{:^16.16}{:<16.16}".format(scroller.scroll(top), bar))
+        else:
+            bar = "IP: {}; DT: {} -- ".format(get_ip(), strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+            display.print(0, 0, "{:^16.16}{:<16.16}".format("Stopped", scroller.scroll(bar, True)))
         return True
     return False

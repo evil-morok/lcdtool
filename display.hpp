@@ -25,7 +25,7 @@ union BtnMapUnion{
 
 class Display {
 
-    static const uint32_t DebounceInterval_us = 150;
+    static const uint32_t DebounceInterval_us = 50;
     static const uint32_t DebounceMultiplifier = 10;
 
 public:

@@ -43,6 +43,10 @@ public:
             if(_pathBack.size() > 0) {
                 _menu->selected = _pathBack.back();
                 _pathBack.pop_back();
+            } else {
+                if (_menu->getParent()) {
+                    EnterView(_menu->getParent()->view);
+                }
             }
         }
         _needUpdate = true;
