@@ -1,10 +1,8 @@
 # lcdtool
-The idea is to create a console application for driving the Raspberry Pi via the 1602 LCD module using the WiringPi library and embedded Python. Why so complex?
-Just for fun. I want to build on it some extensible interface for my music player.
+The idea was to create a console application for driving a Raspberry Pi via the 1602 LCD module using the WiringPi library and embedded Python. Why so complex?
+Just for fun. So I've built some extensible interface for my music player.
 
-Almost there.
-
-What it have for now:
+That's it has for now:
 
 * Simple menu which contains:
     * Player with:
@@ -13,9 +11,9 @@ What it have for now:
     * File system navigator which can send file or directory to the player
     * Power off
 
-The aplication itself is no a music player. It's just a UI, which purpose is to
-call the corresponding methods from the python script.
-The very script contains the music player itself. In the next example I used the  [python-mpd2](https://python-mpd2.readthedocs.io/en/latest/index.html) python module to drive installed [Music Player Daemon](https://www.musicpd.org/)
+The aplication itself is not a music player. It's a just UI, which purpose is to
+call the corresponding methods, implemented in the python script.
+The very python script has to contain the music player itself. In the next example I used the [python-mpd2](https://python-mpd2.readthedocs.io/en/latest/index.html) python module to drive installed [Music Player Daemon](https://www.musicpd.org/)
 
 ```
 import display
